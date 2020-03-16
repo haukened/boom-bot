@@ -28,7 +28,8 @@ This package requires the keybase binary installed on your system, and works on 
         and explode all messages in teams you have permissions.
 ```
 
-Example: `boom-bot --debug --min-lifetime-sec 100 --max-lifetime-sec 500 --teams keybasefriends,mkbot,kbtui`
+#### Example: 
+`boom-bot --debug --min-lifetime-sec 100 --max-lifetime-sec 500 --teams keybasefriends,mkbot,kbtui`
 
 ## Running in the docker container (coming soon):
 You need to set ENV vars instead of passing command line flags:
