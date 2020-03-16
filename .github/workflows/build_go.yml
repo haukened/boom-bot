@@ -28,7 +28,7 @@ jobs:
     - name: Get Short SHA8
       id: vars
       run: |
-        echo ::set-output name=sha_short::$(git rev-parse --short=8 ${{ github.sha }})
+        echo "::set-output name=sha_short::$(git rev-parse --short=8 ${{ github.sha }})"
 
     - name: Get dependencies
       run: go get -v -t -d ./...
