@@ -5,16 +5,22 @@ import (
 	"os"
 
 	"samhofi.us/x/keybase"
+	"samhofi.us/x/keybase/types/chat1"
 )
 
 // Bot holds the necessary information for the bot to work.
 type bot struct {
-	k                  *keybase.Keybase
-	handlers           keybase.Handlers
-	opts               keybase.RunOptions
-	debugEnabled       bool
+	k            *keybase.Keybase
+	handlers     keybase.Handlers
+	opts         keybase.RunOptions
+	debugEnabled bool
+	botOptions   botOptions
+}
+
+type botOptions struct {
 	minAllowedLifetime int64
 	maxAllowedLifetime int64
+	enabledTeams       []chat1.ChatChannel
 }
 
 // newBot returns a new empty bot
