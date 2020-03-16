@@ -11,9 +11,13 @@ This package requires the keybase binary installed on your system, and works on 
 
 ## Running on the command line:
 #### Installation:
-`go get -u github.com/haukened/boom-bot`
-
-`go install github.com/haukened/boom-bot`
+ - `git clone https://github.com/haukened/boom-bot.git`
+ - `cd boom-bot`
+ - `go get -u ./...`
+ - `go build`
+ - `go install`
+ 
+(The typical `go install github.com/haukened/boom-bot` may or may not work due to experimental branch dependencies, and the above proceedure always works even though its longer).
 #### Running:
 ```
   -debug
