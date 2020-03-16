@@ -39,18 +39,14 @@ jobs:
     - name: Upload Artifacts
       if: matrix.platform != 'windows-latest'
       uses: actions/upload-artifact@v1.0.0
-      env:
-        SHA8: ${{ steps.vars.outputs.sha_short }}
       with:
-        name: boom-bot-${{ matrix.platform }}-$SHA8
+        name: boom-bot-${{ matrix.platform }}-${{ steps.vars.outputs.sha_short }}
         path: boom-bot
 
     - name: Upload Artifacts
       if: matrix.platform == 'windows-latest'
       uses: actions/upload-artifact@v1.0.0
-      env:
-        SHA8: ${{ steps.vars.outputs.sha_short }}
       with:
         SHA8: 
-        name: boom-bot-${{ matrix.platform }}-$SHA8
+        name: boom-bot-${{ matrix.platform }}-${{ steps.vars.outputs.sha_short }}
         path: boom-bot.exe
