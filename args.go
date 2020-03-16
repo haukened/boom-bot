@@ -12,9 +12,9 @@ func (b *bot) parseArgs(args []string) error {
 	// first check for command line flags
 	flags := flag.NewFlagSet(args[0], flag.ExitOnError)
 	// default 0 seconds (the keybase min)
-	flags.Int64Var(&b.minAllowedLifetime, "min-lifetime-sec", 0, "sets the minimum exploding lifetime in seconds")
+	flags.Int64Var(&b.botOptions.minAllowedLifetime, "min-lifetime-sec", 0, "sets the minimum exploding lifetime in seconds")
 	// default 7 days (the keybase max)
-	flags.Int64Var(&b.maxAllowedLifetime, "max-lifetime-sec", 604800, "sets the maximum exploding lifetime")
+	flags.Int64Var(&b.botOptions.maxAllowedLifetime, "max-lifetime-sec", 604800, "sets the maximum exploding lifetime")
 	flags.BoolVar(&b.debugEnabled, "debug", false, "enables command debugging")
 	if err := flags.Parse(args[1:]); err != nil {
 		return err
@@ -45,12 +45,12 @@ func (b *bot) parseArgs(args []string) error {
 		}
 
 		// if flag was not set but env was
-		if ret > b.minAllowedLifetime {
-			b.minAllowedLifetime = ret
+		if ret > b.botOptions.minAllowedLifetime {
+			b.botOptions.minAllowedLifetime = ret
 		}
 	}
 	if b.debugEnabled {
-		log.Printf("exploding minimum lifetime set to %d\n", b.minAllowedLifetime)
+		log.Printf("exploding minimum lifetime set to %d\n", b.botOptions.minAllowedLifetime)
 	}
 
 	envMaxLifetime := os.Getenv("MAX_LIFETIME_SEC")
@@ -61,12 +61,12 @@ func (b *bot) parseArgs(args []string) error {
 		}
 
 		// if flag was not set but env was
-		if ret < b.maxAllowedLifetime {
-			b.maxAllowedLifetime = ret
+		if ret < b.botOptions.maxAllowedLifetime {
+			b.botOptions.maxAllowedLifetime = ret
 		}
 	}
 	if b.debugEnabled {
-		log.Printf("exploding maximum lifetime set to %d\n", b.maxAllowedLifetime)
+		log.Printf("exploding maximum lifetime set to %d\n", b.botOptions.maxAllowedLifetime)
 	}
 
 	return nil
