@@ -5,6 +5,9 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
+
+	"samhofi.us/x/keybase/types/chat1"
 )
 
 // parseArgs parses command line and environment args and sets globals
@@ -16,6 +19,8 @@ func (b *bot) parseArgs(args []string) error {
 	// default 7 days (the keybase max)
 	flags.Int64Var(&b.botOptions.maxAllowedLifetime, "max-lifetime-sec", 604800, "sets the maximum exploding lifetime")
 	flags.BoolVar(&b.debugEnabled, "debug", false, "enables command debugging")
+	// this is just to get the teams, then parse them
+	botTeams := flags.String("teams", "", "comma separated list of teams the bot will listen to (user must be a member)")
 	if err := flags.Parse(args[1:]); err != nil {
 		return err
 	}
@@ -37,7 +42,7 @@ func (b *bot) parseArgs(args []string) error {
 		log.Println("Debugging enabled.")
 	}
 
-	envMinLifetime := os.Getenv("MIN_LIFETIME_SEC")
+	envMinLifetime := os.Getenv("BOT_MIN_LIFETIME_SEC")
 	if envMinLifetime != "" {
 		ret, err := strconv.ParseInt(envMinLifetime, 10, 64)
 		if err != nil {
@@ -53,7 +58,7 @@ func (b *bot) parseArgs(args []string) error {
 		log.Printf("exploding minimum lifetime set to %d\n", b.botOptions.minAllowedLifetime)
 	}
 
-	envMaxLifetime := os.Getenv("MAX_LIFETIME_SEC")
+	envMaxLifetime := os.Getenv("BOT_MAX_LIFETIME_SEC")
 	if envMaxLifetime != "" {
 		ret, err := strconv.ParseInt(envMaxLifetime, 10, 64)
 		if err != nil {
@@ -69,5 +74,31 @@ func (b *bot) parseArgs(args []string) error {
 		log.Printf("exploding maximum lifetime set to %d\n", b.botOptions.maxAllowedLifetime)
 	}
 
+	// now check the teams env var
+	envBotTeams := os.Getenv("BOT_TEAMS")
+	// only dereference the pointer one time
+	bTeams := *botTeams
+	if envBotTeams != "" && bTeams == "" {
+		b.debug("listening to teams: %s", envBotTeams)
+		b.botOptions.enabledTeams = parseBotTeams(envBotTeams)
+	} else if envBotTeams == "" && bTeams != "" {
+		b.debug("listening to teams: %s", bTeams)
+		b.botOptions.enabledTeams = parseBotTeams(bTeams)
+	} else {
+		b.debug("no channel filter provided, listening to all teams...")
+	}
+
 	return nil
+}
+
+func parseBotTeams(input string) []chat1.ChatChannel {
+	fields := strings.Split(input, ",")
+	var result []chat1.ChatChannel
+	for _, team := range fields {
+		result = append(result, chat1.ChatChannel{
+			Name:        team,
+			MembersType: "team",
+		})
+	}
+	return result
 }
