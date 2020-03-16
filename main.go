@@ -29,6 +29,7 @@ func newBot() *bot {
 	b.k = keybase.NewKeybase()
 	b.handlers = keybase.Handlers{}
 	b.opts = keybase.RunOptions{}
+	b.botOptions.enabledTeams = []chat1.ChatChannel{}
 	return &b
 }
 
@@ -36,6 +37,14 @@ func newBot() *bot {
 func (b *bot) debug(s string, a ...interface{}) {
 	if b.debugEnabled {
 		log.Printf(s, a...)
+	}
+}
+
+func (b *bot) setOptions() {
+	if len(b.botOptions.enabledTeams) > 0 {
+		b.opts = keybase.RunOptions{
+			FilterChannels: b.botOptions.enabledTeams,
+		}
 	}
 }
 
@@ -47,6 +56,7 @@ func (b *bot) run(args []string) error {
 		return err
 	}
 
+	b.setOptions()
 	b.registerHandlers()
 
 	log.Println("Starting...")
