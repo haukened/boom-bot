@@ -25,23 +25,28 @@ jobs:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
 
+    - name: Get Short SHA8
+      id: vars
+      run: |
+        echo ::set-output name=sha_short::$(git rev-parse --short=8 ${{ github.sha }})
+
     - name: Get dependencies
       run: go get -v -t -d ./...
         
     - name: Build
       run: go build -v .
 
-    - name: Upload Atrifacts
+    - name: Upload Artifacts
       if: matrix.platform != 'windows-latest'
       uses: actions/upload-artifact@v1.0.0
       with:
-        name: boom-bot-${{ matrix.platform }}-${GITHUB_SHA::8}
+        name: boom-bot-${{ matrix.platform }}-${{ setps.vars.output.sha_short }}
         path: boom-bot
 
-    - name: Upload Atrifacts
+    - name: Upload Artifacts
       if: matrix.platform == 'windows-latest'
       uses: actions/upload-artifact@v1.0.0
       with:
         SHA8: 
-        name: boom-bot-${{ matrix.platform }}-${GITHUB_SHA::8}
+        name: boom-bot-${{ matrix.platform }}-${{ setps.vars.output.sha_short }}
         path: boom-bot.exe
