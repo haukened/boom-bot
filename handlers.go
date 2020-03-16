@@ -21,8 +21,14 @@ func (b *bot) registerHandlers() {
 // chatHandler should handle all messages coming from the chat
 func (b *bot) chatHandler(m chat1.MsgSummary) {
 	if m.IsEphemeral {
-		explodingLifetime := int64(m.ETime)
+		explodingLifetime, err := getExplodingLifetimeSeconds(m)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		b.debug("Ephemeral message recieved with %ds lifetime", explodingLifetime)
 		if explodingLifetime < b.minAllowedLifetime || explodingLifetime > b.maxAllowedLifetime {
+			b.debug("message exploded")
 			b.k.DeleteByConvID(m.ConvID, m.Id)
 		}
 	}
