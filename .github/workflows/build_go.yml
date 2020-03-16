@@ -9,8 +9,13 @@ on:
 jobs:
 
   build:
+    strategy:
+      matrix:
+        platform: [ubuntu-latest, macos-latest, windows-latest]
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.platform }}
+    env:
+      SHA8: ${GITHUB_SHA::8}
     steps:
 
     - name: Set up Go 1.13
@@ -32,3 +37,17 @@ jobs:
 
     - name: Build
       run: go build -v .
+
+    - name: Upload Atrifacts
+      if: matrix.platform != 'windows-latest'
+      uses: actions/upload-artifact@v1.0.0
+      with:
+        name: boom-bot-${{ matrix.platform }}-$SHA8
+        path: boom-bot
+
+    - name: Upload Atrifacts
+      if: matrix.platform == 'windows-latest'
+      uses: actions/upload-artifact@v1.0.0
+      with:
+        name: boom-bot-${{ matrix.platform }}-$SHA8
+        path: boom-bot.exe
