@@ -35,7 +35,12 @@ This package requires the keybase binary installed on your system, and works on 
 #### Example: 
 `boom-bot --debug --min-lifetime-sec 100 --max-lifetime-sec 500 --teams keybasefriends,mkbot,kbtui`
 
-## Running in the docker container (coming soon):
+## Running in the docker container:
+#### Pulling the container:
+
+`docker pull haukeness/boom-bot`
+
+#### Running the container:
 You need to set ENV vars instead of passing command line flags:
 
 Required by keybase: (Must set all of these)
@@ -48,3 +53,6 @@ Required by this package: (Set the values you feel like, if you don't set them t
  - `BOT_MIN_LIFETIME_SEC=100`
  - `BOT_MAX_LIFETIME_SEC=500`
  - `BOT_TEAMS="keybasefriends,mkbot,kbtui`
+
+#### Example:
+`docker run --name boomer --rm -d -e KEYBASE_USERNAME=FOO -e KEYBASE_PAPERKEY="bar baz ..." -e KEYBASE_SERVICE=1 -e BOT_DEBUG=true -e BOT_MIN_LIFETIME_SEC=300 -e BOT_TEAMS="keybasefriends,mkbot,kbtui" haukeness/boom-bot`
