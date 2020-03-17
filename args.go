@@ -12,6 +12,8 @@ import (
 
 // parseArgs parses command line and environment args and sets globals
 func (b *bot) parseArgs(args []string) error {
+	// TODO: This needs cleanup.
+
 	// first check for command line flags
 	flags := flag.NewFlagSet(args[0], flag.ExitOnError)
 	// default 0 seconds (the keybase min)
