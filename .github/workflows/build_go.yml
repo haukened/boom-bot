@@ -77,4 +77,4 @@ jobs:
         name: haukeness/boom-bot
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-        tags: "latest,${{ steps.vars.outputs.sha_short }}"
+        tag_semver: true
