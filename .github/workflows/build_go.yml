@@ -68,3 +68,13 @@ jobs:
       with:
         name: boom-bot-${{ matrix.platform }}-${{ steps.vars.outputs.sha_short }}
         path: boom-bot
+
+    - name: Publish Docker Image
+      if: success() && matrix.platform == 'ubuntu-latest'
+      id: upload_docker
+      uses: elgohr/Publish-Docker-Github-Action@master
+      with:
+        name: haukeness/boom-bot
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        tags: "latest,${{ steps.vars.outputs.sha_short }}"
