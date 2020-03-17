@@ -45,8 +45,9 @@ jobs:
       run: go build -v .
 
     - name: Upload Artifacts
-      if: matrix.platform != 'windows-latest'
+      if: matrix.platform == 'macos-latest'
       uses: actions/upload-artifact@v1.0.0
+      id: macos_build
       with:
         name: boom-bot-${{ matrix.platform }}-${{ steps.vars.outputs.sha_short }}
         path: boom-bot
@@ -54,7 +55,24 @@ jobs:
     - name: Upload Artifacts
       if: matrix.platform == 'windows-latest'
       uses: actions/upload-artifact@v1.0.0
+      id: windows_build
       with:
         SHA8: 
         name: boom-bot-${{ matrix.platform }}-${{ steps.vars.outputs.sha_short }}
         path: boom-bot.exe
+
+    - name: Upload Artifacts
+      if: matrix.platform == 'ubuntu-latest'
+      id: ubuntu_build
+      uses: actions/upload-artifact@v1.0.0
+      with:
+        name: boom-bot-${{ matrix.platform }}-${{ steps.vars.outputs.sha_short }}
+        path: boom-bot
+
+    - name: Publish Docker
+      if: success()
+      uses: elgohr/Publish-Docker-Github-Action@2.13
+      with:
+        name: haukeness/boom-bot
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
