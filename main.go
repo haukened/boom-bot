@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"samhofi.us/x/keybase"
-	"samhofi.us/x/keybase/types/chat1"
 )
 
 // Bot holds the necessary information for the bot to work.
@@ -17,10 +16,10 @@ type bot struct {
 }
 
 type botConfig struct {
-	debug              bool
-	minAllowedLifetime int64
-	maxAllowedLifetime int64
-	enabledTeams       []chat1.ChatChannel
+	debug              bool   `env:"BOT_DEBUG"`
+	minAllowedLifetime int64  `env:"BOT_MIN_LIFETIME_SEC"`
+	maxAllowedLifetime int64  `env:"BOT_MAX_LIFETIME_SEC"`
+	enabledTeams       string `env:"BOT_TEAMS"`
 }
 
 // newBot returns a new empty bot
@@ -29,7 +28,6 @@ func newBot() *bot {
 	b.k = keybase.NewKeybase()
 	b.handlers = keybase.Handlers{}
 	b.opts = keybase.RunOptions{}
-	b.config.enabledTeams = []chat1.ChatChannel{}
 	return &b
 }
 
@@ -44,7 +42,7 @@ func (b *bot) debug(s string, a ...interface{}) {
 func (b *bot) setOptions() {
 	if len(b.config.enabledTeams) > 0 {
 		b.opts = keybase.RunOptions{
-			FilterChannels: b.config.enabledTeams,
+			FilterChannels: parseBotTeams(b.config.enabledTeams),
 		}
 	}
 }

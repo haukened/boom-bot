@@ -22,7 +22,7 @@ func (b *bot) parseArgs(args []string) error {
 	flags.Int64Var(&b.config.maxAllowedLifetime, "max-lifetime-sec", 604800, "sets the maximum exploding lifetime")
 	flags.BoolVar(&b.config.debug, "debug", false, "enables command debugging")
 	// this is just to get the teams, then parse them
-	botTeams := flags.String("teams", "", "comma separated list of teams the bot will listen to (user must be a member)")
+	flags.StringVar(&b.config.enabledTeams, "teams", "", "comma separated list of teams the bot will listen to (user must be a member)")
 	if err := flags.Parse(args[1:]); err != nil {
 		return err
 	}
@@ -78,14 +78,11 @@ func (b *bot) parseArgs(args []string) error {
 
 	// now check the teams env var
 	envBotTeams := os.Getenv("BOT_TEAMS")
-	// only dereference the pointer one time
-	bTeams := *botTeams
-	if envBotTeams != "" && bTeams == "" {
+	if envBotTeams != "" && b.config.enabledTeams == "" {
 		b.debug("listening to teams: %s", envBotTeams)
-		b.config.enabledTeams = parseBotTeams(envBotTeams)
-	} else if envBotTeams == "" && bTeams != "" {
-		b.debug("listening to teams: %s", bTeams)
-		b.config.enabledTeams = parseBotTeams(bTeams)
+		b.config.enabledTeams = envBotTeams
+	} else if envBotTeams == "" && b.config.enabledTeams != "" {
+		b.debug("listening to teams: %s", b.config.enabledTeams)
 	} else {
 		b.debug("no channel filter provided, listening to all teams...")
 	}
