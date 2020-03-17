@@ -2,89 +2,59 @@ package main
 
 import (
 	"flag"
-	"log"
-	"os"
-	"strconv"
 	"strings"
 
+	"github.com/caarlos0/env"
 	"samhofi.us/x/keybase/types/chat1"
 )
 
 // parseArgs parses command line and environment args and sets globals
 func (b *bot) parseArgs(args []string) error {
-	//TODO: clean this up
+	// parse the env variables into the bot config
+	if err := env.Parse(&b.config); err != nil {
+		return err
+	}
 
-	// first check for command line flags
+	// then parse CLI args as overrides
 	flags := flag.NewFlagSet(args[0], flag.ExitOnError)
-	// default 0 seconds (the keybase min)
-	flags.Int64Var(&b.config.minAllowedLifetime, "min-lifetime-sec", 0, "sets the minimum exploding lifetime in seconds")
-	// default 7 days (the keybase max)
-	flags.Int64Var(&b.config.maxAllowedLifetime, "max-lifetime-sec", 604800, "sets the maximum exploding lifetime")
-	flags.BoolVar(&b.config.debug, "debug", false, "enables command debugging")
-	// this is just to get the teams, then parse them
-	flags.StringVar(&b.config.enabledTeams, "teams", "", "comma separated list of teams the bot will listen to (user must be a member)")
+	cliConfig := botConfig{}
+	flags.Int64Var(&cliConfig.MinAllowedLifetime, "min-lifetime-sec", -1, "sets the minimum exploding lifetime in seconds")
+	flags.Int64Var(&cliConfig.MaxAllowedLifetime, "max-lifetime-sec", -1, "sets the maximum exploding lifetime")
+	flags.BoolVar(&cliConfig.Debug, "debug", false, "enables command debugging")
+	flags.StringVar(&cliConfig.EnabledTeams, "teams", "", "comma separated list of teams the bot will listen to (user must be a member)")
 	if err := flags.Parse(args[1:]); err != nil {
 		return err
 	}
 
-	// then check the env vars
-	envDebug := os.Getenv("BOT_DEBUG")
-	if envDebug != "" {
-		ret, err := strconv.ParseBool(envDebug)
-		if err != nil {
-			return err
+	// then override the environment vars if there were cli args
+	if flags.NFlag() > 0 {
+		if cliConfig.MinAllowedLifetime > 0 {
+			b.config.MinAllowedLifetime = cliConfig.MinAllowedLifetime
+		}
+		if cliConfig.MaxAllowedLifetime > 0 {
+			b.config.MaxAllowedLifetime = cliConfig.MaxAllowedLifetime
+		}
+		if cliConfig.Debug == true {
+			b.config.Debug = true
+		}
+		if cliConfig.EnabledTeams != "" {
+			b.config.EnabledTeams = cliConfig.EnabledTeams
 		}
 
-		// if flag was false but env is true, set debug
-		if b.config.debug == false && ret == true {
-			b.config.debug = true
-		}
-	}
-	if b.config.debug {
-		log.Println("Debugging enabled.")
 	}
 
-	envMinLifetime := os.Getenv("BOT_MIN_LIFETIME_SEC")
-	if envMinLifetime != "" {
-		ret, err := strconv.ParseInt(envMinLifetime, 10, 64)
-		if err != nil {
-			return err
-		}
-
-		// if flag was not set but env was
-		if ret > b.config.minAllowedLifetime {
-			b.config.minAllowedLifetime = ret
-		}
+	// then print the running options
+	b.debug("Debug Enabled")
+	if b.config.MaxAllowedLifetime < 604800 {
+		b.debug("Exploding maximum allowed message life set to %d", b.config.MaxAllowedLifetime)
 	}
-	if b.config.debug {
-		log.Printf("exploding minimum lifetime set to %d\n", b.config.minAllowedLifetime)
+	if b.config.MinAllowedLifetime > 0 {
+		b.debug("Exploding minimum allowed message life set to %d", b.config.MinAllowedLifetime)
 	}
-
-	envMaxLifetime := os.Getenv("BOT_MAX_LIFETIME_SEC")
-	if envMaxLifetime != "" {
-		ret, err := strconv.ParseInt(envMaxLifetime, 10, 64)
-		if err != nil {
-			return err
-		}
-
-		// if flag was not set but env was
-		if ret < b.config.maxAllowedLifetime {
-			b.config.maxAllowedLifetime = ret
-		}
-	}
-	if b.config.debug {
-		log.Printf("exploding maximum lifetime set to %d\n", b.config.maxAllowedLifetime)
-	}
-
-	// now check the teams env var
-	envBotTeams := os.Getenv("BOT_TEAMS")
-	if envBotTeams != "" && b.config.enabledTeams == "" {
-		b.debug("listening to teams: %s", envBotTeams)
-		b.config.enabledTeams = envBotTeams
-	} else if envBotTeams == "" && b.config.enabledTeams != "" {
-		b.debug("listening to teams: %s", b.config.enabledTeams)
+	if b.config.EnabledTeams != "" {
+		b.debug("Listening to teams: %s", b.config.EnabledTeams)
 	} else {
-		b.debug("no channel filter provided, listening to all teams...")
+		b.debug("no team filter provided, listening to all teams...")
 	}
 
 	return nil

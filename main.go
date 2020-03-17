@@ -15,11 +15,12 @@ type bot struct {
 	config   botConfig
 }
 
+// NOTE: fields must be exported for reflect to work
 type botConfig struct {
-	debug              bool   `env:"BOT_DEBUG"`
-	minAllowedLifetime int64  `env:"BOT_MIN_LIFETIME_SEC"`
-	maxAllowedLifetime int64  `env:"BOT_MAX_LIFETIME_SEC"`
-	enabledTeams       string `env:"BOT_TEAMS"`
+	Debug              bool   `env:"BOT_DEBUG" envDefault:"false"`
+	MinAllowedLifetime int64  `env:"BOT_MIN_LIFETIME_SEC" envDefault:"0"`
+	MaxAllowedLifetime int64  `env:"BOT_MAX_LIFETIME_SEC" envDefault:"604800"`
+	EnabledTeams       string `env:"BOT_TEAMS" envDefault:""`
 }
 
 // newBot returns a new empty bot
@@ -28,21 +29,22 @@ func newBot() *bot {
 	b.k = keybase.NewKeybase()
 	b.handlers = keybase.Handlers{}
 	b.opts = keybase.RunOptions{}
+	b.config = botConfig{}
 	return &b
 }
 
 // Debug provides printing only when --debug flag is set or BOT_DEBUG env var is set
 func (b *bot) debug(s string, a ...interface{}) {
-	if b.config.debug {
+	if b.config.Debug {
 		log.Printf(s, a...)
 	}
 }
 
 // setOptions applies filter channels, if they are provided
 func (b *bot) setOptions() {
-	if len(b.config.enabledTeams) > 0 {
+	if len(b.config.EnabledTeams) > 0 {
 		b.opts = keybase.RunOptions{
-			FilterChannels: parseBotTeams(b.config.enabledTeams),
+			FilterChannels: parseBotTeams(b.config.EnabledTeams),
 		}
 	}
 }

@@ -27,7 +27,7 @@ func (b *bot) chatHandler(m chat1.MsgSummary) {
 			return
 		}
 		b.debug("Ephemeral message recieved with %ds lifetime", explodingLifetime)
-		if explodingLifetime < b.config.minAllowedLifetime || explodingLifetime > b.config.maxAllowedLifetime {
+		if explodingLifetime < b.config.MinAllowedLifetime || explodingLifetime > b.config.MaxAllowedLifetime {
 			b.debug("message exploded")
 			b.k.DeleteByConvID(m.ConvID, m.Id)
 		}
