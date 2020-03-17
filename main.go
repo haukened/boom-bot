@@ -40,6 +40,7 @@ func (b *bot) debug(s string, a ...interface{}) {
 	}
 }
 
+// setOptions applies filter channels, if they are provided
 func (b *bot) setOptions() {
 	if len(b.botOptions.enabledTeams) > 0 {
 		b.opts = keybase.RunOptions{
