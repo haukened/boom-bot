@@ -10,14 +10,14 @@ import (
 
 // Bot holds the necessary information for the bot to work.
 type bot struct {
-	k            *keybase.Keybase
-	handlers     keybase.Handlers
-	opts         keybase.RunOptions
-	debugEnabled bool
-	botOptions   botOptions
+	k        *keybase.Keybase
+	handlers keybase.Handlers
+	opts     keybase.RunOptions
+	config   botConfig
 }
 
-type botOptions struct {
+type botConfig struct {
+	debug              bool
 	minAllowedLifetime int64
 	maxAllowedLifetime int64
 	enabledTeams       []chat1.ChatChannel
@@ -29,22 +29,22 @@ func newBot() *bot {
 	b.k = keybase.NewKeybase()
 	b.handlers = keybase.Handlers{}
 	b.opts = keybase.RunOptions{}
-	b.botOptions.enabledTeams = []chat1.ChatChannel{}
+	b.config.enabledTeams = []chat1.ChatChannel{}
 	return &b
 }
 
 // Debug provides printing only when --debug flag is set or BOT_DEBUG env var is set
 func (b *bot) debug(s string, a ...interface{}) {
-	if b.debugEnabled {
+	if b.config.debug {
 		log.Printf(s, a...)
 	}
 }
 
 // setOptions applies filter channels, if they are provided
 func (b *bot) setOptions() {
-	if len(b.botOptions.enabledTeams) > 0 {
+	if len(b.config.enabledTeams) > 0 {
 		b.opts = keybase.RunOptions{
-			FilterChannels: b.botOptions.enabledTeams,
+			FilterChannels: b.config.enabledTeams,
 		}
 	}
 }
